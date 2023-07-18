@@ -4,6 +4,8 @@ import com.epam.esm.exception.DataProcessingException;
 import com.epam.esm.model.Tag;
 import com.epam.esm.repository.TagRepository;
 import com.epam.esm.service.TagService;
+
+import java.math.BigInteger;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,17 +29,16 @@ public class TagServiceImpl implements TagService {
         if (tagRepository.update(tag) <= 0) {
             throw new DataProcessingException("Can't update tag " + tag);
         }
-        return tagRepository.get(tag.getId()).orElseThrow(
-                () -> new DataProcessingException("Can't update tag " + tag));
+        return get(tag.getId());
     }
 
     @Override
-    public void delete(Long id) {
+    public void delete(BigInteger id) {
         tagRepository.delete(id);
     }
 
     @Override
-    public Tag get(Long id) {
+    public Tag get(BigInteger id) {
         return tagRepository.get(id).orElseThrow(
                 () -> new DataProcessingException("Can't get tag with id " + id));
     }
@@ -45,5 +46,10 @@ public class TagServiceImpl implements TagService {
     @Override
     public List<Tag> getAll() {
         return tagRepository.getAll();
+    }
+
+    @Override
+    public List<Tag> getByNames(List<String> names) {
+        return tagRepository.getByNames(names);
     }
 }

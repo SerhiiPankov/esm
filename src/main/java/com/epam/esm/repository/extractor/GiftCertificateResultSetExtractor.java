@@ -1,6 +1,8 @@
 package com.epam.esm.repository.extractor;
 
 import com.epam.esm.model.GiftCertificate;
+
+import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -14,7 +16,7 @@ public class GiftCertificateResultSetExtractor implements ResultSetExtractor<Gif
     public GiftCertificate extractData(ResultSet rs) throws SQLException, DataAccessException {
         GiftCertificate giftCertificate = new GiftCertificate();
         if (rs.next()) {
-            giftCertificate.setId(rs.getObject("id", Long.class));
+            giftCertificate.setId(rs.getObject("id", BigInteger.class));
             giftCertificate.setName(rs.getNString("name"));
             giftCertificate.setDescription(rs.getNString("description"));
             giftCertificate.setPrice(rs.getBigDecimal("price"));

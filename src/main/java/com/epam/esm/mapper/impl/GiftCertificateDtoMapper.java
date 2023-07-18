@@ -7,8 +7,9 @@ import com.epam.esm.dto.TagResponseDto;
 import com.epam.esm.mapper.DtoMapper;
 import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.model.Tag;
+import com.epam.esm.service.TagService;
 import org.springframework.stereotype.Component;
-
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
@@ -16,24 +17,23 @@ public class GiftCertificateDtoMapper
         implements DtoMapper<GiftCertificate, GiftCertificateRequestDto, GiftCertificateResponseDto> {
 
     private final DtoMapper<Tag, TagRequestDto, TagResponseDto> tagDtoMapper;
+    private final TagService tagService;
 
-    public GiftCertificateDtoMapper(DtoMapper<Tag, TagRequestDto, TagResponseDto> tagDtoMapper) {
+    public GiftCertificateDtoMapper(DtoMapper<Tag, TagRequestDto, TagResponseDto> tagDtoMapper,
+                                    TagService tagService) {
         this.tagDtoMapper = tagDtoMapper;
+        this.tagService = tagService;
     }
 
     @Override
-    public GiftCertificate mapToModel(GiftCertificateRequestDto dto) {
+    public GiftCertificate mapToModel(GiftCertificateRequestDto dto) throws ReflectiveOperationException {
         GiftCertificate giftCertificate = new GiftCertificate();
         giftCertificate.setName(dto.getName());
         giftCertificate.setDescription(dto.getDescription());
         giftCertificate.setPrice(dto.getPrice());
         giftCertificate.setDuration(dto.getDuration());
-        giftCertificate.setCreateDate(dto.getCreateDate());
-        giftCertificate.setLastUpdateDate(dto.getLastUpdateDate());
-
-
-
-        return null;
+        giftCertificate.setTags(getTags(dto.getTags()));
+        return giftCertificate;
     }
 
     @Override
@@ -50,5 +50,19 @@ public class GiftCertificateDtoMapper
                 .map(tagDtoMapper::mapToDto)
                 .collect(Collectors.toList()));
         return giftCertificateResponseDto;
+    }
+
+    private List<Tag> getTags(List<String> tagNames) throws ReflectiveOperationException {
+        if (tagNames == null) {
+            return null;
+        }
+        List<Tag> tagsFromDb = tagService.getByNames(tagNames);
+        tagNames.removeAll(tagsFromDb.stream().map(Tag::getName).collect(Collectors.toList()));
+        for (String name: tagNames) {
+            Tag tag = new Tag();
+            tag.setName(name);
+            tagsFromDb.add(tagService.create(tag));
+        }
+        return tagsFromDb;
     }
 }

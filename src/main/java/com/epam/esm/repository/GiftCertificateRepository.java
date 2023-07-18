@@ -9,9 +9,13 @@ public interface GiftCertificateRepository {
 
     int update(GiftCertificate giftCertificate) throws ReflectiveOperationException;
 
-    void delete(Long id);
+    void delete(Object id);
 
-    Optional<GiftCertificate> get(Long id);
+    Optional<GiftCertificate> get(Object id);
 
     List<GiftCertificate> getAll();
+
+    void addTags(GiftCertificate giftCertificate);
+
+    List<GiftCertificate> getAllByTag(String tagName);
 }

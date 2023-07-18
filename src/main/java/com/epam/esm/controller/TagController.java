@@ -5,6 +5,8 @@ import com.epam.esm.dto.TagResponseDto;
 import com.epam.esm.mapper.DtoMapper;
 import com.epam.esm.model.Tag;
 import com.epam.esm.service.TagService;
+
+import java.math.BigInteger;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -36,7 +38,7 @@ public class TagController {
     }
 
     @PutMapping("/{id}")
-    public TagResponseDto update(@PathVariable Long id,
+    public TagResponseDto update(@PathVariable BigInteger id,
                                  @RequestBody TagRequestDto requestDto)
             throws ReflectiveOperationException {
         Tag tag = dtoMapper.mapToModel(requestDto);
@@ -46,12 +48,12 @@ public class TagController {
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
+    public void delete(@PathVariable BigInteger id) {
         tagService.delete(id);
     }
 
     @GetMapping("/{id}")
-    public TagResponseDto get(@PathVariable Long id) {
+    public TagResponseDto get(@PathVariable BigInteger id) {
         return dtoMapper.mapToDto(tagService.get(id));
     }
 

@@ -1,8 +1,7 @@
 package com.epam.esm.dto;
 
-import lombok.Data;
-
 import java.math.BigInteger;
+import lombok.Data;
 
 @Data
 public class TagResponseDto {

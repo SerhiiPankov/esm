@@ -1,33 +1,36 @@
 package com.epam.esm.repository;
 
-import java.lang.reflect.Field;
+import com.epam.esm.util.ReflectionUtil;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
-
-import com.epam.esm.annotation.DbColumn;
-import com.epam.esm.annotation.DbId;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
 public abstract class AbstractRepository<T> {
-    private static final Collector<CharSequence, ?, String> COLLECTOR = Collectors.joining(", ", " (", ") ");
-    private final Class<T> clazz;
+    private static final Collector<CharSequence, ?, String> COLLECTOR =
+            Collectors.joining(", ", " (", ") ");
     protected final JdbcTemplate jdbcTemplate;
     protected final RowMapper<T> rowMapper;
+    protected final ReflectionUtil<T> reflectionUtil;
+    private final Class<T> clazz;
 
-    public AbstractRepository(JdbcTemplate jdbcTemplate, Class<T> clazz, RowMapper<T> rowMapper) {
+    public AbstractRepository(JdbcTemplate jdbcTemplate, Class<T> clazz,
+                              RowMapper<T> rowMapper, ReflectionUtil<T> reflectionUtil) {
         this.jdbcTemplate = jdbcTemplate;
         this.clazz = clazz;
         this.rowMapper = rowMapper;
+        this.reflectionUtil = reflectionUtil;
     }
 
-    public T create(T t) throws ReflectiveOperationException {
-        Map<String, Object> entityData = getEntityData(t);
+    public T create(T t) {
+        Map<String, Object> entityData = reflectionUtil.getEntityData(t, clazz);
         String sql = generateInsertSqlQuery(entityData);
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(con -> {
@@ -41,13 +44,14 @@ public abstract class AbstractRepository<T> {
             return preparedStatement;
         },
                 keyHolder);
-        return setId(t, keyHolder.getKeyAs(getIdField(t).getType()));
+        return reflectionUtil.setId(t,clazz, keyHolder.getKeyAs(
+                reflectionUtil.getIdField(t, clazz).getType()));
     }
 
-    public int update(T t) throws ReflectiveOperationException {
-        Map<String, Object> entityData = getEntityData(t);
+    public int update(T t) {
+        Map<String, Object> entityData = reflectionUtil.getEntityData(t, clazz);
         String sql = generateUpdateSqlQuery(entityData);
-        Object id = getId(t);
+        Object id = reflectionUtil.getId(t, clazz);
         return jdbcTemplate.update(con -> {
             PreparedStatement preparedStatement = con.prepareStatement(sql);
             int i = 1;
@@ -77,31 +81,6 @@ public abstract class AbstractRepository<T> {
         return jdbcTemplate.query(sql, rowMapper);
     }
 
-    private Field getIdField(T t) throws NoSuchFieldException {
-        for (Field field: clazz.getDeclaredFields()) {
-            if (Arrays.stream(field.getAnnotations()).anyMatch(a -> a.annotationType() == DbId.class)) {
-                return field;
-            }
-        }
-        throw new NoSuchFieldException("Can't get id field from " + t.getClass() + " class");
-    }
-
-    private Object getId(T t) throws NoSuchFieldException, IllegalAccessException {
-        Field idField = getIdField(t);
-        idField.setAccessible(true);
-        Object id = idField.get(t);
-        idField.setAccessible(false);
-        return id;
-    }
-
-    private T setId(T t, Object id) throws IllegalAccessException, NoSuchFieldException {
-        Field idField = getIdField(t);
-        idField.setAccessible(true);
-        idField.set(t, id);
-        idField.setAccessible(false);
-        return t;
-    }
-
     private String generateInsertSqlQuery(Map<String, Object> entityData) {
         return "INSERT INTO " + clazz.getSimpleName()
                 + entityData.keySet().stream().collect(COLLECTOR)
@@ -111,22 +90,10 @@ public abstract class AbstractRepository<T> {
     }
 
     private String generateUpdateSqlQuery(Map<String, Object> entityData) {
-        return  "UPDATE " + clazz.getSimpleName() + " SET "
-                + entityData.keySet().stream().map(s -> s + " ?").collect(Collectors.joining(", "))
+        return "UPDATE " + clazz.getSimpleName() + " SET "
+                + entityData.keySet().stream()
+                .map(s -> s + " = ?")
+                .collect(Collectors.joining(", "))
                 + " WHERE id = ?";
-    }
-
-    private Map<String, Object> getEntityData(T t) throws IllegalAccessException {
-        Map<String, Object> entityMap = new TreeMap<>();
-        Field[] fields = clazz.getDeclaredFields();
-        for (Field field: fields) {
-            field.setAccessible(true);
-            if (Arrays.stream(field.getAnnotations()).anyMatch(a -> a.annotationType() == DbColumn.class)
-                    && field.get(t) != null) {
-                entityMap.put(field.getName(), field.get(t));
-            }
-            field.setAccessible(false);
-        }
-        return entityMap;
     }
 }

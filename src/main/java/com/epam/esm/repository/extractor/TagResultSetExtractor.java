@@ -1,7 +1,6 @@
 package com.epam.esm.repository.extractor;
 
 import com.epam.esm.model.Tag;
-
 import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.SQLException;

@@ -5,9 +5,15 @@ import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.repository.GiftCertificateRepository;
 import com.epam.esm.repository.TagRepository;
 import com.epam.esm.service.GiftCertificateService;
+import com.epam.esm.service.specification.PaginationAndSortingHandler;
+import com.epam.esm.service.specification.SpecificationManager;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.StringJoiner;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,16 +21,22 @@ import org.springframework.transaction.annotation.Transactional;
 public class GiftCertificateServiceImpl implements GiftCertificateService {
     private final GiftCertificateRepository giftCertificateRepository;
     private final TagRepository tagRepository;
+    private final SpecificationManager specificationManager;
+    private final PaginationAndSortingHandler paginationAndSortingHandler;
 
-    public GiftCertificateServiceImpl(GiftCertificateRepository giftCertificateRepository, TagRepository tagRepository) {
+    public GiftCertificateServiceImpl(GiftCertificateRepository giftCertificateRepository,
+                                      TagRepository tagRepository,
+                                      SpecificationManager specificationManager,
+                                      PaginationAndSortingHandler paginationAndSortingHandler) {
         this.giftCertificateRepository = giftCertificateRepository;
         this.tagRepository = tagRepository;
+        this.specificationManager = specificationManager;
+        this.paginationAndSortingHandler = paginationAndSortingHandler;
     }
 
     @Transactional
     @Override
-    public GiftCertificate create(GiftCertificate giftCertificate)
-            throws ReflectiveOperationException {
+    public GiftCertificate create(GiftCertificate giftCertificate) {
         LocalDateTime now = LocalDateTime.now();
         giftCertificate.setCreateDate(now);
         giftCertificate.setLastUpdateDate(now);
@@ -35,8 +47,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
 
     @Transactional
     @Override
-    public GiftCertificate update(GiftCertificate giftCertificate)
-            throws ReflectiveOperationException {
+    public GiftCertificate update(GiftCertificate giftCertificate) {
         giftCertificate.setLastUpdateDate(LocalDateTime.now());
         if (giftCertificate.getTags() != null) {
             giftCertificateRepository.addTags(giftCertificate);
@@ -65,16 +76,20 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
 
     @Transactional
     @Override
-    public List<GiftCertificate> getAll() {
-        List<GiftCertificate> allCertificate = giftCertificateRepository.getAll();
-        allCertificate.forEach(c -> c.setTags(tagRepository.getTagsByGiftCertificateId(c.getId())));
-        return allCertificate;
-    }
-
-    @Override
-    public List<GiftCertificate> getAllByTag(String tagName) {
-        List<GiftCertificate> allCertificateByTag = giftCertificateRepository.getAllByTag(tagName);
-        allCertificateByTag.forEach(c -> c.setTags(tagRepository.getTagsByGiftCertificateId(c.getId())));
-        return allCertificateByTag;
+    public List<GiftCertificate> getAllByParameters(Map<String, String> params) {
+        List<String> specificationIgnoreParams = new ArrayList<>();
+        Collections.addAll(specificationIgnoreParams, paginationAndSortingHandler.getFields());
+        StringJoiner specification = new StringJoiner(" AND ", " WHERE ", " ");
+        for (Map.Entry<String, String> param : params.entrySet()) {
+            if (!specificationIgnoreParams.contains(param.getKey())) {
+                specification.add(specificationManager.get(param.getKey(),
+                        param.getValue().split(",")));
+            }
+        }
+        List<GiftCertificate> allByParameters = giftCertificateRepository
+                .getAllByParameters(specification + paginationAndSortingHandler.handle(params));
+        allByParameters.forEach(
+                c -> c.setTags(tagRepository.getTagsByGiftCertificateId(c.getId())));
+        return allByParameters;
     }
 }

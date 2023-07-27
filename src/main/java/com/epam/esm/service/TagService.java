@@ -1,14 +1,13 @@
 package com.epam.esm.service;
 
 import com.epam.esm.model.Tag;
-
 import java.math.BigInteger;
 import java.util.List;
 
 public interface TagService {
-    Tag create(Tag tag) throws ReflectiveOperationException;
+    Tag create(Tag tag);
 
-    Tag update(Tag tag) throws ReflectiveOperationException;
+    Tag update(Tag tag);
 
     void delete(BigInteger id);
 

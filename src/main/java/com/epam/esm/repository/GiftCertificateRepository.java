@@ -5,17 +5,15 @@ import java.util.List;
 import java.util.Optional;
 
 public interface GiftCertificateRepository {
-    GiftCertificate create(GiftCertificate giftCertificate) throws ReflectiveOperationException;
+    GiftCertificate create(GiftCertificate giftCertificate);
 
-    int update(GiftCertificate giftCertificate) throws ReflectiveOperationException;
+    int update(GiftCertificate giftCertificate);
 
     void delete(Object id);
 
     Optional<GiftCertificate> get(Object id);
 
-    List<GiftCertificate> getAll();
-
     void addTags(GiftCertificate giftCertificate);
 
-    List<GiftCertificate> getAllByTag(String tagName);
+    List<GiftCertificate> getAllByParameters(String spec);
 }

@@ -3,27 +3,20 @@ package com.epam.esm.repository.impl;
 import com.epam.esm.model.Tag;
 import com.epam.esm.repository.AbstractRepository;
 import com.epam.esm.repository.TagRepository;
+import com.epam.esm.util.ReflectionUtil;
+import java.math.BigInteger;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import java.math.BigInteger;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 @Repository
 public class TagRepositoryImpl extends AbstractRepository<Tag> implements TagRepository {
 
-    public TagRepositoryImpl(JdbcTemplate jdbcTemplate, RowMapper<Tag> rowMapper) {
-        super(jdbcTemplate, Tag.class, rowMapper);
-    }
-
-    @Override
-    public Optional<Tag> getByName(String name) {
-        String sql = "SELECT * FROM Tag "
-                + " WHERE name = '" + name + "'";
-        return Optional.ofNullable(jdbcTemplate.queryForObject(sql, super.rowMapper));
+    public TagRepositoryImpl(JdbcTemplate jdbcTemplate, RowMapper<Tag> rowMapper,
+                             ReflectionUtil<Tag> reflectionUtil) {
+        super(jdbcTemplate, Tag.class, rowMapper, reflectionUtil);
     }
 
     @Override
@@ -32,7 +25,6 @@ public class TagRepositoryImpl extends AbstractRepository<Tag> implements TagRep
                 + " WHERE name IN "
                 + names.stream().collect(Collectors.joining("', '", "('", "')"));
         return jdbcTemplate.query(sql, super.rowMapper);
-
     }
 
     @Override

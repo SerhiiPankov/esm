@@ -4,7 +4,6 @@ import com.epam.esm.exception.DataProcessingException;
 import com.epam.esm.model.Tag;
 import com.epam.esm.repository.TagRepository;
 import com.epam.esm.service.TagService;
-
 import java.math.BigInteger;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -18,14 +17,15 @@ public class TagServiceImpl implements TagService {
         this.tagRepository = tagRepository;
     }
 
+    @Transactional
     @Override
-    public Tag create(Tag tag) throws ReflectiveOperationException {
+    public Tag create(Tag tag) {
         return tagRepository.create(tag);
     }
 
     @Transactional
     @Override
-    public Tag update(Tag tag) throws ReflectiveOperationException {
+    public Tag update(Tag tag) {
         if (tagRepository.update(tag) <= 0) {
             throw new DataProcessingException("Can't update tag " + tag);
         }

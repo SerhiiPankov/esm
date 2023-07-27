@@ -1,12 +1,11 @@
 package com.epam.esm.model;
 
+import com.epam.esm.annotation.DbColumn;
+import com.epam.esm.annotation.DbId;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
-
-import com.epam.esm.annotation.DbColumn;
-import com.epam.esm.annotation.DbId;
 import lombok.Data;
 
 @Data

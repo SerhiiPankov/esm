@@ -4,12 +4,13 @@ import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.model.Tag;
 import com.epam.esm.repository.AbstractRepository;
 import com.epam.esm.repository.GiftCertificateRepository;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Repository;
+import com.epam.esm.util.ReflectionUtil;
 import java.sql.PreparedStatement;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Repository;
 
 @Repository
 public class GiftCertificateRepositoryImpl extends AbstractRepository<GiftCertificate>
@@ -17,8 +18,9 @@ public class GiftCertificateRepositoryImpl extends AbstractRepository<GiftCertif
     private static final int SHIFT = 2;
 
     public GiftCertificateRepositoryImpl(JdbcTemplate jdbcTemplate,
-                                         RowMapper<GiftCertificate> rowMapper) {
-        super(jdbcTemplate, GiftCertificate.class, rowMapper);
+                                         RowMapper<GiftCertificate> rowMapper,
+                                         ReflectionUtil<GiftCertificate> reflectionUtil) {
+        super(jdbcTemplate, GiftCertificate.class, rowMapper, reflectionUtil);
     }
 
     @Override
@@ -39,11 +41,14 @@ public class GiftCertificateRepositoryImpl extends AbstractRepository<GiftCertif
     }
 
     @Override
-    public List<GiftCertificate> getAllByTag(String tagName) {
-        String sql = "SELECT * FROM GiftCertificate gc"
-                + " JOIN Tag_GiftCertificate tgc ON gc.id = tgc.gift_certificate_id"
-                + " JOIN Tag t ON t.id = tgc.tag_id"
-                + " WHERE t.name = '" + tagName + "'";
+    public List<GiftCertificate> getAllByParameters(String spec) {
+        String sql = "SELECT DISTINCT gc.id AS id, gc.name AS name, gc.description AS description, "
+                + "gc.price AS price, gc.duration AS duration, "
+                + " gc.createDate AS createDate, gc.lastUpdateDate AS lastUpdateDate"
+                + " FROM GiftCertificate gc "
+                + " INNER JOIN Tag_GiftCertificate tgc ON gc.id = tgc.gift_certificate_id "
+                + " INNER JOIN Tag t ON tgc.tag_id = t.id "
+                + spec;
         return jdbcTemplate.query(sql, rowMapper);
     }
 }

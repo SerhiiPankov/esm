@@ -8,14 +8,18 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+@EnableTransactionManagement
 @Configuration
 @PropertySource("classpath:db.properties")
 @ComponentScan("com.epam.esm")
-public class AppConfig {
+public class DbConfiguration {
     private final Environment env;
 
-    public AppConfig(Environment env) {
+    public DbConfiguration(Environment env) {
         this.env = env;
     }
 
@@ -33,5 +37,10 @@ public class AppConfig {
     @Bean
     public JdbcTemplate getJdbcTemplate() {
         return new JdbcTemplate(getMysqlDataSource());
+    }
+
+    @Bean
+    public PlatformTransactionManager transactionManager() {
+        return new DataSourceTransactionManager(getMysqlDataSource());
     }
 }

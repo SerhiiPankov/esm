@@ -1,11 +1,10 @@
 package com.epam.esm.dto;
 
-import lombok.Data;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
+import lombok.Data;
 
 @Data
 public class GiftCertificateResponseDto {

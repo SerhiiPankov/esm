@@ -8,13 +8,13 @@ import com.epam.esm.mapper.DtoMapper;
 import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.model.Tag;
 import com.epam.esm.service.TagService;
-import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.stereotype.Component;
 
 @Component
-public class GiftCertificateDtoMapper
-        implements DtoMapper<GiftCertificate, GiftCertificateRequestDto, GiftCertificateResponseDto> {
+public class GiftCertificateDtoMapper implements
+        DtoMapper<GiftCertificate, GiftCertificateRequestDto, GiftCertificateResponseDto> {
 
     private final DtoMapper<Tag, TagRequestDto, TagResponseDto> tagDtoMapper;
     private final TagService tagService;
@@ -26,7 +26,7 @@ public class GiftCertificateDtoMapper
     }
 
     @Override
-    public GiftCertificate mapToModel(GiftCertificateRequestDto dto) throws ReflectiveOperationException {
+    public GiftCertificate mapToModel(GiftCertificateRequestDto dto) {
         GiftCertificate giftCertificate = new GiftCertificate();
         giftCertificate.setName(dto.getName());
         giftCertificate.setDescription(dto.getDescription());
@@ -52,7 +52,7 @@ public class GiftCertificateDtoMapper
         return giftCertificateResponseDto;
     }
 
-    private List<Tag> getTags(List<String> tagNames) throws ReflectiveOperationException {
+    private List<Tag> getTags(List<String> tagNames) {
         if (tagNames == null) {
             return null;
         }

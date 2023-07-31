@@ -5,8 +5,8 @@ import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.repository.GiftCertificateRepository;
 import com.epam.esm.repository.TagRepository;
 import com.epam.esm.service.GiftCertificateService;
-import com.epam.esm.service.specification.PaginationAndSortingHandler;
-import com.epam.esm.service.specification.SpecificationManager;
+import com.epam.esm.specification.PaginationAndSortingHandler;
+import com.epam.esm.specification.SpecificationManager;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -55,7 +55,10 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         if (giftCertificateRepository.update(giftCertificate) <= 0) {
             throw new DataProcessingException("Can't update gift certificate " + giftCertificate);
         }
-        return get(giftCertificate.getId());
+        GiftCertificate giftCertificateFromDb = giftCertificateRepository.get(giftCertificate.getId()).orElseThrow(
+                () -> new DataProcessingException("Can't get gift certificate with id " + giftCertificate.getId()));
+        giftCertificateFromDb.setTags(tagRepository.getTagsByGiftCertificateId(giftCertificate.getId()));
+        return giftCertificateFromDb;
     }
 
     @Transactional

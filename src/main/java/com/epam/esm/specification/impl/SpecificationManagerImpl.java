@@ -1,8 +1,8 @@
-package com.epam.esm.service.specification.impl;
+package com.epam.esm.specification.impl;
 
 import com.epam.esm.exception.RequestException;
-import com.epam.esm.service.specification.SpecificationManager;
-import com.epam.esm.service.specification.SpecificationProvider;
+import com.epam.esm.specification.SpecificationManager;
+import com.epam.esm.specification.SpecificationProvider;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;

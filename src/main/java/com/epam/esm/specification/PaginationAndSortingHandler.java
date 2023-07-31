@@ -1,4 +1,4 @@
-package com.epam.esm.service.specification;
+package com.epam.esm.specification;
 
 import com.epam.esm.exception.RequestException;
 import java.util.Map;

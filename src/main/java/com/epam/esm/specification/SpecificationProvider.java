@@ -1,4 +1,4 @@
-package com.epam.esm.service.specification;
+package com.epam.esm.specification;
 
 public interface SpecificationProvider {
     String getSpecification(String[] params);

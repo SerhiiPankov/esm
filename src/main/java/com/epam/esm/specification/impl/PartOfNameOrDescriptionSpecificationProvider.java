@@ -1,6 +1,6 @@
-package com.epam.esm.service.specification.impl;
+package com.epam.esm.specification.impl;
 
-import com.epam.esm.service.specification.SpecificationProvider;
+import com.epam.esm.specification.SpecificationProvider;
 import java.util.StringJoiner;
 import org.springframework.stereotype.Component;
 
